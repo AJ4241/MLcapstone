@@ -14,7 +14,6 @@ from sklearn.metrics import silhouette_score, davies_bouldin_score
 import matplotlib as plt
 
 allBooks = pd.read_csv("BDind.csv",index_col=False, usecols=['Genre','Age Group','Time Period','Book Length','Format'])
-print(allBooks)
 
 sScore = []
 dbScore = []
@@ -26,28 +25,28 @@ for i in range(2, 20, 1):
   sScore.append(silhouette_score(allBooks, cAssign))
   dbScore.append(davies_bouldin_score(allBooks, cAssign))
 
+for i in range(2, 20, 1):
+  km = KMeans(n_clusters=i)
+  km.fit(allBooks)
+  kclust = km.predict(allBooks)
+  sS.append(silhouette_score(allBooks, kclust))
+  dbS.append(davies_bouldin_score(allBooks, kclust))
+
+#Calculate the Silhouette Coefficient Score for the number of clusters
 plDFS = pd.DataFrame(columns = ['Cluster Score'], index = [i for i in range(2, len(sScore)+2)])
 plDFS['Cluster Score'] = sScore
 print("max value: \nCluster Num", plDFS[plDFS['Cluster Score']==plDFS['Cluster Score'].max()])
 
-
-'''plt.figure(figsize=(16,6))
-plt.style.use('ggplot')
-plt.plot(x,y)
-plt.xlabel("num of clusters")
-plt.ylabel("score")
-plt.show()'''
-
+#Calculate the Davies-Bouldin Score for the number of clusters
 plDF = pd.DataFrame(columns = ['Cluster Score'], index = [i for i in range(2, len(dbScore)+2)])
 plDF['Cluster Score'] = dbScore
 print("max value: \nCluster Num", plDF[plDF['Cluster Score']==plDF['Cluster Score'].max()])
 
+#I decided to go with the the D-B score which was 5 clusters
 modKM = KMeans(n_clusters=5).fit(allBooks)
 
 predictingKM = modKM.predict(allBooks)
 
 allBooks["KMeans Cluster"] = predictingKM
-
-print(allBooks)
 
 allBooks.to_csv("withclusters5u.csv", index=False)
